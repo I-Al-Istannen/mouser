@@ -2,7 +2,6 @@
 /// connect to it.
 class BackendInfo {
   final Uri uri;
-  final String name;
 
-  BackendInfo(this.uri, this.name);
+  BackendInfo(this.uri);
 }

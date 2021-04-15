@@ -1,41 +1,55 @@
 import 'dart:async';
 
 import 'package:esense_flutter/esense.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mouser/model/EsenseUnit.dart';
 
-enum ConnectionResult { ConnectTryFailed, Connected, Timeout, DeviceNotFound }
 enum SamplingResult { NotConnected, Started }
+enum ConnectState {
+  Connected,
+  Connecting,
+  DeviceFound,
+  DeviceNotFound,
+  Disconnected
+}
 
 /// Encapsulates communication with an eSense unit.
-class ESenseCommunicator {
+class ESenseCommunicator extends ChangeNotifier {
   StreamSubscription<SensorEvent> _sensorSubscription;
   final List<StreamSubscription<Object>> _openSubscriptions = [];
   final ESenseManager _manager = ESenseManager();
 
-  Completer<ConnectionResult> _connectCompleter;
+  ConnectState _connectionState = ConnectState.Disconnected;
+
+  /// Returns the current connection state
+  ConnectState get connectionState => _connectionState;
+
+  ESenseCommunicator() {
+    _init();
+  }
 
   /// Connects to the device outlined in the given [configuration].
-  Future<ConnectionResult> connect(UnitConfiguration configuration) async {
-    await dispose();
+  Future<bool> connect(UnitConfiguration configuration) async {
+    print("Switched to connecting...");
 
-    var connectTryFailed = await _manager.connect(configuration.deviceName);
-
-    if (connectTryFailed) {
-      return ConnectionResult.ConnectTryFailed;
+    if (connectionState == ConnectState.Connecting) {
+      return false;
     }
 
-    _init();
+    _connectionState = ConnectState.Connecting;
+    notifyListeners();
 
-    return _connectCompleter.future.timeout(Duration(seconds: 15),
-        onTimeout: () => ConnectionResult.Timeout);
+    return await _manager.connect("eSense-0115");
   }
 
   /// Starts sampling the eSense unit for data.
   Future<SamplingResult> startSampling(
       UnitConfiguration configuration, callback(SensorEvent event)) async {
-    if (!await _manager.isConnected()) {
+    if (connectionState != ConnectState.Connected) {
       return SamplingResult.NotConnected;
     }
+
+    await _manager.setSamplingRate(configuration.sampleRate);
 
     _sensorSubscription = _manager.sensorEvents.listen(callback);
     _openSubscriptions.add(_sensorSubscription);
@@ -54,26 +68,42 @@ class ESenseCommunicator {
 
   /// Disposes this manager, disconnecting from the handheld and ceasing all
   /// listen operations.
-  Future<void> dispose() async {
+  Future<void> destroy() async {
+    print("DESTROY");
     stopSampling();
     _openSubscriptions.forEach((element) {
       element.cancel();
     });
     _openSubscriptions.clear();
 
-    if (await _manager.isConnected()) {
+    if (connectionState != ConnectState.Disconnected) {
       await _manager.disconnect();
     }
+
+    _connectionState = ConnectState.Disconnected;
+    notifyListeners();
   }
 
   void _init() {
-    var subscription = _manager.connectionEvents.listen((event) {
-      if (event.type == ConnectionType.connected) {
-        _connectCompleter.complete(ConnectionResult.Connected);
-      } else if (event.type == ConnectionType.device_not_found) {
-        _connectCompleter.complete(ConnectionResult.DeviceNotFound);
+    _manager.connectionEvents.listen((event) {
+      print(event);
+      switch (event.type) {
+        case ConnectionType.unknown:
+          print(":(");
+          break;
+        case ConnectionType.connected:
+          _connectionState = ConnectState.Connected;
+          break;
+        case ConnectionType.disconnected:
+          _connectionState = ConnectState.Disconnected;
+          break;
+        case ConnectionType.device_found:
+          _connectionState = ConnectState.DeviceFound;
+          break;
+        case ConnectionType.device_not_found:
+          _connectionState = ConnectState.DeviceNotFound;
       }
+      notifyListeners();
     });
-    _openSubscriptions.add(subscription);
   }
 }
