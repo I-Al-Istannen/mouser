@@ -1,0 +1,6 @@
+package de.ialistannen.mouser
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}
