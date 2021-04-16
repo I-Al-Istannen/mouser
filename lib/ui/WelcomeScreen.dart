@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mouser/ui/BackendConfigScreen.dart';
 import 'package:mouser/ui/EsenseConfigWidget.dart';
-import 'package:mouser/ui/SampleScreen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   @override
@@ -31,10 +31,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         }
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => SampleScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => BackendConfigScreen(),
+                          ),
                         );
                       },
-                      child: Text("Continue to sampling"),
+                      child: Text("Continue"),
                     ),
                   ),
                 )

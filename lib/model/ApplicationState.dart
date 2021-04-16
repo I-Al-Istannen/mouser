@@ -18,4 +18,10 @@ class ApplicationState extends ChangeNotifier {
 
   /// Information about the used backend. Might be null.
   BackendInfo get backendInfo => _backendInfo;
+
+  /// Sets the used backend information.
+  set backendInfo(BackendInfo info) {
+    this._backendInfo = info;
+    notifyListeners();
+  }
 }
