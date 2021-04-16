@@ -17,6 +17,7 @@ class FloatingControlButton extends StatelessWidget {
         _state(communicator, appState.unitConfiguration, sensorState);
 
         return FloatingActionButton(
+          heroTag: "control",
           child: Icon(state["icon"]),
           tooltip: state["tooltip"],
           onPressed: () {
@@ -30,9 +31,9 @@ class FloatingControlButton extends StatelessWidget {
   _state(ESenseCommunicator communicator, UnitConfiguration configuration,
       SensorState sensorState) {
     var state = communicator.connectionState;
-    var sampling = communicator.isSampling;
+    var sampling = communicator.samplingState;
 
-    if (sampling) {
+    if (sampling == SamplingState.Sampling) {
       return {
         "icon": MdiIcons.timerOffOutline,
         "tooltip": "Stop sampling",
@@ -45,9 +46,6 @@ class FloatingControlButton extends StatelessWidget {
           "icon": MdiIcons.timerOutline,
           "tooltip": "Start sampling",
           "action": () {
-            sensorState.calibrationData = CalibrationData(0, 0);
-            sensorState.pitchRollData = PitchRollData(0, 0);
-
             communicator.startSampling(configuration, sensorState);
           }
         };

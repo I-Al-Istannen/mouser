@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:mouser/communication/ESenseCommunication.dart';
 import 'package:mouser/ui/ConnectStateDisplay.dart';
+import 'package:mouser/ui/FloatingCalibrateButton.dart';
 import 'package:mouser/ui/FloatingControlButton.dart';
 import 'package:mouser/ui/OffsetDisplay.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +40,21 @@ class SampleScreen extends StatelessWidget {
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingControlButton(),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 32),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: FloatingControlButton(),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingCalibrateButton(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -57,7 +72,10 @@ class SampleScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(MdiIcons.rotateOrbit),
+                  Icon(
+                    MdiIcons.rotateOrbit,
+                    color: Color.fromARGB(255, 117, 117, 117),
+                  ),
                   SizedBox(width: 8),
                   Text(
                     "Detected Rotation Preview",
@@ -79,12 +97,14 @@ class SampleScreen extends StatelessWidget {
   }
 
   Widget _buildOffsetDisplayInner(ESenseCommunicator communicator) {
-    if(communicator.isSampling) {
+    if (communicator.samplingState == SamplingState.Sampling) {
       return OffsetDisplay();
     }
-    switch(communicator.connectionState) {
+    switch (communicator.connectionState) {
       case ConnectState.Connected:
-        return Text("Start sampling with the button below :)");
+        return Text(
+            "Start sampling with the center button below or calibrate your"
+            " setup with the button to the right.");
       case ConnectState.Connecting:
       case ConnectState.DeviceFound:
         return Text("Please wait while the connection is established…");

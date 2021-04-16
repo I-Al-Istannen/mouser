@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mouser/math/PitchRollCalculator.dart';
 import 'package:mouser/model/EsenseUnit.dart';
 import 'package:mouser/model/SensorState.dart';
+import 'package:mouser/model/Sensors.dart';
 
 enum SamplingResult { NotConnected, Started }
 enum ConnectState {
@@ -15,20 +16,31 @@ enum ConnectState {
   Disconnected
 }
 
+enum SamplingState { NotSampling, Sampling, Calibrating }
+
 /// Encapsulates communication with an eSense unit.
 class ESenseCommunicator extends ChangeNotifier {
   StreamSubscription<SensorEvent> _sensorSubscription;
   final List<StreamSubscription<Object>> _openSubscriptions = [];
   final ESenseManager _manager = ESenseManager();
 
-  bool _isSampling = false;
+  SamplingState _samplingState = SamplingState.NotSampling;
   ConnectState _connectionState = ConnectState.Disconnected;
 
+  int _calibrationRoundsCount = 0;
+  int _calibrationRoundsLeft = 0;
+
   /// Return whether it is currently sampling data.
-  bool get isSampling => _isSampling;
+  SamplingState get samplingState => _samplingState;
 
   /// Returns the current connection state.
   ConnectState get connectionState => _connectionState;
+
+  /// The amount of calibration rounds that are still missing
+  int get calibrationRoundsLeft => _calibrationRoundsLeft;
+
+  /// The total amount of calibration rounds to perform
+  int get calibrationRoundsCount => _calibrationRoundsCount;
 
   ESenseCommunicator() {
     _init();
@@ -58,6 +70,11 @@ class ESenseCommunicator extends ChangeNotifier {
     _sensorSubscription = _manager.sensorEvents.listen((event) {
       var accel = convertAccToG(event.accel);
       var gyro = convertGyroToDegPerSecond(event.gyro);
+
+      if(sensorState.pitchRollData == null) {
+        sensorState.pitchRollData = PitchRollData(0, 0);
+      }
+
       var newData = adjustToSample(
         sensorState.pitchRollData,
         accel,
@@ -65,11 +82,37 @@ class ESenseCommunicator extends ChangeNotifier {
         configuration.sampleRate,
       );
 
-      sensorState.pitchRollData = newData;
+      if (_calibrationRoundsLeft > 1) {
+        _calibrationRoundsLeft--;
+
+        sensorState.pitchRollData = PitchRollData(
+          sensorState.pitchRollData.pitch + newData.pitch,
+          sensorState.pitchRollData.roll + newData.roll,
+        );
+
+        notifyListeners();
+      } else if (_calibrationRoundsLeft == 1) {
+        _calibrationRoundsLeft--;
+
+        sensorState.calibrationData = CalibrationData(
+          sensorState.pitchRollData.pitch / _calibrationRoundsCount,
+          sensorState.pitchRollData.roll / _calibrationRoundsCount,
+        );
+        sensorState.pitchRollData = PitchRollData(0, 0);
+
+        // And end it!
+        stopSampling();
+      } else {
+        sensorState.pitchRollData = newData;
+      }
     });
     _openSubscriptions.add(_sensorSubscription);
 
-    _isSampling = true;
+    if (_calibrationRoundsLeft <= 0) {
+      _samplingState = SamplingState.Sampling;
+    } else {
+      _samplingState = SamplingState.Calibrating;
+    }
     notifyListeners();
 
     return SamplingResult.Started;
@@ -82,8 +125,16 @@ class ESenseCommunicator extends ChangeNotifier {
       _openSubscriptions.remove(_sensorSubscription);
       _sensorSubscription = null;
     }
-    _isSampling = false;
+    _samplingState = SamplingState.NotSampling;
     notifyListeners();
+  }
+
+  Future<SamplingResult> startCalibrating(
+      UnitConfiguration configuration, SensorState sensorState) {
+    _calibrationRoundsCount = configuration.sampleRate * 5;
+    _calibrationRoundsLeft = _calibrationRoundsCount;
+    sensorState.pitchRollData = PitchRollData(0, 0);
+    return startSampling(configuration, sensorState);
   }
 
   /// Disposes this manager, disconnecting from the handheld and ceasing all
