@@ -126,6 +126,7 @@ class ESenseCommunicator extends ChangeNotifier {
       _sensorSubscription = null;
     }
     _samplingState = SamplingState.NotSampling;
+    _calibrationRoundsLeft = 0;
     notifyListeners();
   }
 
@@ -167,6 +168,7 @@ class ESenseCommunicator extends ChangeNotifier {
           break;
         case ConnectionType.disconnected:
           _connectionState = ConnectState.Disconnected;
+          stopSampling();
           break;
         case ConnectionType.device_found:
           _connectionState = ConnectState.DeviceFound;

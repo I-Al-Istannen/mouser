@@ -83,6 +83,12 @@ class __CalibrationButtonState extends State<_CalibrationButton> {
         if (communicator.samplingState == SamplingState.NotSampling &&
             _hasCalledCalibrate) {
           Future.microtask(() => Navigator.pop(context));
+          return Container();
+        }
+
+        if(communicator.connectionState != ConnectState.Connected) {
+          Future.microtask(() => Navigator.pop(context));
+          return Container();
         }
 
         var isCalibrating =
