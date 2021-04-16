@@ -21,8 +21,6 @@ class ESenseConfigWidget extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(32, 0, 16, 8),
               child: ListTile(
                 contentPadding: EdgeInsets.all(0),
-                minLeadingWidth: 10,
-                leading: Icon(Icons.edit),
                 title: Text("Device name"),
                 subtitle: DeviceNameInputField(),
               ),
@@ -31,8 +29,6 @@ class ESenseConfigWidget extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(32, 8, 16, 8),
               child: ListTile(
                 contentPadding: EdgeInsets.all(0),
-                minLeadingWidth: 10,
-                leading: Icon(Icons.timer),
                 title: Text("Sample rate"),
                 subtitle: SampleRateInputSlider(),
               ),
