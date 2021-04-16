@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mouser/model/ApplicationState.dart';
+import 'package:mouser/model/SensorState.dart';
 import 'package:mouser/model/Sensors.dart';
 import 'package:provider/provider.dart';
 
 class OffsetDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ApplicationState>(
+    return Consumer<SensorState>(
       builder: (context, state, child) {
         if (state.calibratedPitchRollData == null) {
           return Center(

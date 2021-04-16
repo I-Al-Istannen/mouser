@@ -30,8 +30,6 @@ class ESenseCommunicator extends ChangeNotifier {
 
   /// Connects to the device outlined in the given [configuration].
   Future<bool> connect(UnitConfiguration configuration) async {
-    print("Switched to connecting...");
-
     if (connectionState == ConnectState.Connecting) {
       return false;
     }

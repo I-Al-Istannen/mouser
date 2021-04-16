@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mouser/communication/ESenseCommunication.dart';
 import 'package:mouser/model/ApplicationState.dart';
+import 'package:mouser/model/SensorState.dart';
 import 'package:mouser/ui/WelcomeScreen.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,7 @@ void main() {
     providers: [
       ChangeNotifierProvider(create: (_) => ApplicationState()),
       ChangeNotifierProvider(create: (_) => ESenseCommunicator()),
+      ChangeNotifierProvider(create: (_) => SensorState()),
     ],
     child: MyApp(),
   ));
