@@ -10,6 +10,22 @@ class ConnectStateDisplay extends StatelessWidget {
       builder: (context, communicator, child) {
         var data = _connectStateLabels()[communicator.connectionState];
 
+        var progressChildren = [];
+
+        if(data["progress"]) {
+          progressChildren = [
+            SizedBox(width: 8),
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                value: null,
+                strokeWidth: 1,
+              ),
+            )
+          ];
+        }
+
         return Card(
           elevation: 8,
           child: Padding(
@@ -21,7 +37,8 @@ class ConnectStateDisplay extends StatelessWidget {
                 Text(
                   data["text"],
                   style: TextStyle(color: Colors.grey),
-                )
+                ),
+                ...progressChildren
               ],
             ),
           ),
@@ -34,23 +51,28 @@ class ConnectStateDisplay extends StatelessWidget {
     return {
       ConnectState.Connected: {
         "text": "Connected",
-        "icon": MdiIcons.bluetoothConnect
+        "icon": MdiIcons.bluetoothConnect,
+        "progress": false
       },
       ConnectState.Connecting: {
-        "text": "Connecting...",
-        "icon": MdiIcons.bluetooth
+        "text": "Connecting",
+        "icon": MdiIcons.bluetooth,
+        "progress": true
       },
       ConnectState.Disconnected: {
         "text": "Disconnected",
-        "icon": MdiIcons.bluetoothOff
+        "icon": MdiIcons.bluetoothOff,
+        "progress": false
       },
       ConnectState.DeviceNotFound: {
         "text": "Device not found",
-        "icon": MdiIcons.cellphoneOff
+        "icon": MdiIcons.cellphoneOff,
+        "progress": false
       },
       ConnectState.DeviceFound: {
         "text": "Device found",
-        "icon": MdiIcons.cellphone
+        "icon": MdiIcons.cellphone,
+        "progress": true
       },
     };
   }
