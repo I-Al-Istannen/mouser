@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:esense_flutter/esense.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mouser/model/EsenseUnit.dart';
 
 enum SamplingResult { NotConnected, Started }

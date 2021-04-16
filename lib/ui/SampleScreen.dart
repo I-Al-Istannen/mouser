@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mouser/communication/ESenseCommunication.dart';
 import 'package:mouser/math/PitchRollCalculator.dart';
