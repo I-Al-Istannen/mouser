@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mouser/communication/ESenseCommunication.dart';
-import 'package:mouser/math/PitchRollCalculator.dart';
-import 'package:mouser/model/ApplicationState.dart';
-import 'package:mouser/model/SensorState.dart';
-import 'package:mouser/model/Sensors.dart';
 import 'package:mouser/ui/ConnectStateDisplay.dart';
+import 'package:mouser/ui/FloatingControlButton.dart';
 import 'package:mouser/ui/OffsetDisplay.dart';
 import 'package:provider/provider.dart';
 
@@ -25,8 +22,6 @@ class SampleScreen extends StatelessWidget {
                     SizedBox(
                       height: 30,
                     ),
-                    buildConnectButton(communicator),
-                    buildStartSampleButton(communicator),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 8,
@@ -51,57 +46,8 @@ class SampleScreen extends StatelessWidget {
           );
         },
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingControlButton(),
     );
-  }
-
-  Widget buildConnectButton(ESenseCommunicator communicator) {
-    if (communicator.connectionState == ConnectState.Disconnected) {
-      return Consumer<ApplicationState>(
-        builder: (context, appState, child) => Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-          child: ElevatedButton(
-            onPressed: () async {
-              await communicator.connect(appState.unitConfiguration);
-            },
-            child: Text("Connect"),
-          ),
-        ),
-      );
-    }
-    return Container();
-  }
-
-  Widget buildStartSampleButton(ESenseCommunicator communicator) {
-    if (communicator.connectionState == ConnectState.Connected) {
-      return Consumer2<SensorState, ApplicationState>(
-        builder: (context, sensorState, appState, child) => Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-          child: ElevatedButton(
-            onPressed: () async {
-              sensorState.calibrationData = CalibrationData(0, 0);
-              sensorState.pitchRollData = PitchRollData(0, 0);
-
-              await communicator.startSampling(
-                appState.unitConfiguration,
-                (event) {
-                  var accel = convertAccToG(event.accel);
-                  var gyro = convertGyroToDegPerSecond(event.gyro);
-                  var newData = adjustToSample(
-                    sensorState.pitchRollData,
-                    accel,
-                    gyro,
-                    appState.unitConfiguration.sampleRate,
-                  );
-
-                  sensorState.pitchRollData = newData;
-                },
-              );
-            },
-            child: Text("Start Sampling"),
-          ),
-        ),
-      );
-    }
-    return Container();
   }
 }

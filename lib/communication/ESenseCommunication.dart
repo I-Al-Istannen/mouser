@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mouser/math/PitchRollCalculator.dart';
 import 'package:mouser/model/EsenseUnit.dart';
+import 'package:mouser/model/SensorState.dart';
 
 enum SamplingResult { NotConnected, Started }
 enum ConnectState {
@@ -19,9 +21,13 @@ class ESenseCommunicator extends ChangeNotifier {
   final List<StreamSubscription<Object>> _openSubscriptions = [];
   final ESenseManager _manager = ESenseManager();
 
+  bool _isSampling = false;
   ConnectState _connectionState = ConnectState.Disconnected;
 
-  /// Returns the current connection state
+  /// Return whether it is currently sampling data.
+  bool get isSampling => _isSampling;
+
+  /// Returns the current connection state.
   ConnectState get connectionState => _connectionState;
 
   ESenseCommunicator() {
@@ -42,15 +48,29 @@ class ESenseCommunicator extends ChangeNotifier {
 
   /// Starts sampling the eSense unit for data.
   Future<SamplingResult> startSampling(
-      UnitConfiguration configuration, callback(SensorEvent event)) async {
+      UnitConfiguration configuration, SensorState sensorState) async {
     if (connectionState != ConnectState.Connected) {
       return SamplingResult.NotConnected;
     }
 
     await _manager.setSamplingRate(configuration.sampleRate);
 
-    _sensorSubscription = _manager.sensorEvents.listen(callback);
+    _sensorSubscription = _manager.sensorEvents.listen((event) {
+      var accel = convertAccToG(event.accel);
+      var gyro = convertGyroToDegPerSecond(event.gyro);
+      var newData = adjustToSample(
+        sensorState.pitchRollData,
+        accel,
+        gyro,
+        configuration.sampleRate,
+      );
+
+      sensorState.pitchRollData = newData;
+    });
     _openSubscriptions.add(_sensorSubscription);
+
+    _isSampling = true;
+    notifyListeners();
 
     return SamplingResult.Started;
   }
@@ -62,12 +82,13 @@ class ESenseCommunicator extends ChangeNotifier {
       _openSubscriptions.remove(_sensorSubscription);
       _sensorSubscription = null;
     }
+    _isSampling = false;
+    notifyListeners();
   }
 
   /// Disposes this manager, disconnecting from the handheld and ceasing all
   /// listen operations.
   Future<void> destroy() async {
-    print("DESTROY");
     stopSampling();
     _openSubscriptions.forEach((element) {
       element.cancel();
