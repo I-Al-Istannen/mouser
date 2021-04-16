@@ -18,8 +18,12 @@ class _DeviceNameInputFieldState extends State<DeviceNameInputField> {
           text: state.unitConfiguration.deviceName,
         );
         return TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           controller: _controller,
-          decoration: InputDecoration(hintText: "eSense-XXXX"),
+          decoration: InputDecoration(
+            hintText: "eSense-XXXX",
+            isDense: true,
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return "Please enter a value";
