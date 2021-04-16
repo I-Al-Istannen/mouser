@@ -16,6 +16,8 @@ class PitchRollData {
   /// Calibrates this data using the passed [CalibrationData].
   PitchRollData calibrated(CalibrationData calibrationData) {
     return PitchRollData(
-        pitch - calibrationData.offsetPitch, roll - calibrationData.offsetRoll);
+      pitch - calibrationData.offsetPitch,
+      roll - calibrationData.offsetRoll,
+    );
   }
 }

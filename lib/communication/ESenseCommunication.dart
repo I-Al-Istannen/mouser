@@ -85,9 +85,9 @@ class ESenseCommunicator extends ChangeNotifier {
       if (_calibrationRoundsLeft > 1) {
         _calibrationRoundsLeft--;
 
-        sensorState.pitchRollData = PitchRollData(
-          sensorState.pitchRollData.pitch + newData.pitch,
-          sensorState.pitchRollData.roll + newData.roll,
+        sensorState.calibrationData = CalibrationData(
+          sensorState.calibrationData.offsetPitch + newData.pitch,
+          sensorState.calibrationData.offsetRoll + newData.roll,
         );
 
         notifyListeners();
@@ -95,8 +95,8 @@ class ESenseCommunicator extends ChangeNotifier {
         _calibrationRoundsLeft--;
 
         sensorState.calibrationData = CalibrationData(
-          sensorState.pitchRollData.pitch / _calibrationRoundsCount,
-          sensorState.pitchRollData.roll / _calibrationRoundsCount,
+          sensorState.calibrationData.offsetPitch / _calibrationRoundsCount,
+          sensorState.calibrationData.offsetRoll / _calibrationRoundsCount,
         );
         sensorState.pitchRollData = PitchRollData(0, 0);
 
@@ -134,6 +134,7 @@ class ESenseCommunicator extends ChangeNotifier {
     _calibrationRoundsCount = configuration.sampleRate * 5;
     _calibrationRoundsLeft = _calibrationRoundsCount;
     sensorState.pitchRollData = PitchRollData(0, 0);
+    sensorState.calibrationData = CalibrationData(0, 0);
     return startSampling(configuration, sensorState);
   }
 
