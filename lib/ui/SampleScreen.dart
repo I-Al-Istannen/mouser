@@ -44,9 +44,10 @@ class SampleScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-        child: Consumer<SensorState>(
-          builder: (context, state, child) {
-            if (state.calibrationData == null) {
+        child: Consumer2<ESenseCommunicator, SensorState>(
+          builder: (context, communicator, state, child) {
+            if (state.calibrationData == null &&
+                communicator.connectionState == ConnectState.Connected) {
               return Stack(
                 children: [
                   Align(
@@ -128,7 +129,7 @@ class SampleScreen extends StatelessWidget {
             }
             return Text(
               "Start sampling with the center button below or calibrate your"
-                  " setup with the button to the right.",
+              " setup with the button to the right.",
             );
           },
         );
