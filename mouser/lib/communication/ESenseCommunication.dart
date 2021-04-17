@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +19,8 @@ enum ConnectState {
 
 enum SamplingState { NotSampling, Sampling, Calibrating }
 
+final _nodThreshold = 60;
+
 /// Encapsulates communication with an eSense unit.
 class ESenseCommunicator extends ChangeNotifier {
   StreamSubscription<SensorEvent> _sensorSubscription;
@@ -29,6 +32,9 @@ class ESenseCommunicator extends ChangeNotifier {
 
   int _calibrationRoundsCount = 0;
   int _calibrationRoundsLeft = 0;
+
+  List<double> _lastYGyroMeasurements = [];
+  int _nodCooldown = 0;
 
   /// Return whether it is currently sampling data.
   SamplingState get samplingState => _samplingState;
@@ -103,6 +109,17 @@ class ESenseCommunicator extends ChangeNotifier {
         // And end it!
         stopSampling();
       } else {
+        _nodCooldown = max(0, _nodCooldown - 1);
+        if (_lastYGyroMeasurements.length > 5) {
+          _lastYGyroMeasurements.removeAt(0);
+        }
+        _lastYGyroMeasurements.add(gyro[2]);
+        if (_isNod()) {
+          _nodCooldown = configuration.sampleRate;
+          sensorState.detectedNod = true;
+        } else {
+          sensorState.detectedNod = false;
+        }
         sensorState.pitchRollData = newData;
       }
     });
@@ -116,6 +133,16 @@ class ESenseCommunicator extends ChangeNotifier {
     notifyListeners();
 
     return SamplingResult.Started;
+  }
+
+  bool _isNod() {
+    if(_nodCooldown > 0) {
+      return false;
+    }
+    if (!_lastYGyroMeasurements.any((element) => element > _nodThreshold)) {
+      return false;
+    }
+    return _lastYGyroMeasurements.any((element) => element > -_nodThreshold);
   }
 
   /// Stops sampling the eSense unit for data.

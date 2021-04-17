@@ -5,6 +5,8 @@ class SensorState extends ChangeNotifier {
   CalibrationData _calibrationData;
   PitchRollData _pitchRollData;
 
+  bool _detectedNod = false;
+
   /// Returns the current calibration data. Might be null.
   CalibrationData get calibrationData => _calibrationData;
 
@@ -18,6 +20,16 @@ class SensorState extends ChangeNotifier {
 
   set pitchRollData(PitchRollData it) {
     this._pitchRollData = it;
+    notifyListeners();
+  }
+
+  bool get detectedNod => _detectedNod;
+
+  set detectedNod(bool detected) {
+    if(detected == _detectedNod) {
+      return;
+    }
+    _detectedNod = detected;
     notifyListeners();
   }
 
