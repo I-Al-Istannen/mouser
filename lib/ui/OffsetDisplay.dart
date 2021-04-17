@@ -33,7 +33,7 @@ class _OffsetPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var center = Offset(size.width / 2, size.height / 2);
-    var moved = center.translate(pitchRollData.roll, pitchRollData.pitch);
+    var moved = center.translate(-pitchRollData.roll, pitchRollData.pitch);
     canvas.drawLine(
       center,
       moved,
