@@ -106,7 +106,10 @@ class SampleScreen extends StatelessWidget {
               ),
             ),
             subtitle: Center(
-              child: _buildOffsetDisplayInner(communicator),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+                child: _buildOffsetDisplayInner(communicator),
+              ),
             ),
           ),
         ),
