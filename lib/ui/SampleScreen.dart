@@ -1,21 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:mouser/communication/BluetoothServices.dart';
 import 'package:mouser/communication/ESenseCommunication.dart';
 import 'package:mouser/model/SensorState.dart';
 import 'package:mouser/ui/BackendDataSender.dart';
+import 'package:mouser/ui/BluetoothEnableScreen.dart';
 import 'package:mouser/ui/ConnectStateDisplay.dart';
 import 'package:mouser/ui/FloatingCalibrateButton.dart';
 import 'package:mouser/ui/FloatingControlButton.dart';
 import 'package:mouser/ui/OffsetDisplay.dart';
 import 'package:provider/provider.dart';
 
-class SampleScreen extends StatelessWidget {
+class SampleScreen extends StatefulWidget {
+  @override
+  _SampleScreenState createState() => _SampleScreenState();
+}
+
+class _SampleScreenState extends State<SampleScreen> {
+  bool hasNavigated = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Sampling")),
-      body: Consumer<ESenseCommunicator>(
-        builder: (context, communicator, child) {
+      body: Consumer2<ESenseCommunicator, BluetoothServices>(
+        builder: (context, communicator, bluetooth, child) {
+          if (bluetooth.locationEnabled != ActivationState.Enabled ||
+              bluetooth.bluetoothEnabled != ActivationState.Enabled) {
+            if (!hasNavigated) {
+              Future.microtask(
+                () async {
+                  hasNavigated = true;
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => BluetoothEnableScreen()),
+                  );
+                  hasNavigated = false;
+                },
+              );
+            }
+            return Container();
+          }
+
           return WillPopScope(
             child: Center(
               child: Padding(

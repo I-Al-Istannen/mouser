@@ -13,7 +13,7 @@ class BluetoothServices extends ChangeNotifier {
   ActivationState _locationEnabled;
 
   BluetoothServices() {
-    Timer.periodic(Duration(seconds: 1), (timer) async {
+    Timer.periodic(Duration(seconds: 2), (timer) async {
       var enabled = await Geolocator.isLocationServiceEnabled();
       var allowed = await Geolocator.checkPermission();
 
@@ -59,4 +59,9 @@ class BluetoothServices extends ChangeNotifier {
 
   /// Returns whether location services are enabled on the device.
   ActivationState get locationEnabled => _locationEnabled;
+
+  /// Returns whether location and bluetooth services are enabled.
+  bool get bothEnabled =>
+      bluetoothEnabled == ActivationState.Enabled &&
+      locationEnabled == ActivationState.Enabled;
 }
