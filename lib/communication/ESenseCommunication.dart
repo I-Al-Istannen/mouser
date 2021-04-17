@@ -71,7 +71,7 @@ class ESenseCommunicator extends ChangeNotifier {
       var accel = convertAccToG(event.accel);
       var gyro = convertGyroToDegPerSecond(event.gyro);
 
-      if(sensorState.pitchRollData == null) {
+      if (sensorState.pitchRollData == null) {
         sensorState.pitchRollData = PitchRollData(0, 0);
       }
 

@@ -4,7 +4,6 @@ import 'package:mouser/communication/ESenseCommunication.dart';
 import 'package:mouser/model/ApplicationState.dart';
 import 'package:mouser/model/EsenseUnit.dart';
 import 'package:mouser/model/SensorState.dart';
-import 'package:mouser/model/Sensors.dart';
 import 'package:provider/provider.dart';
 
 class FloatingControlButton extends StatelessWidget {
@@ -14,7 +13,7 @@ class FloatingControlButton extends StatelessWidget {
       builder: (context, communicator, appState, child) {
         var sensorState = Provider.of<SensorState>(context, listen: false);
         var state =
-        _state(communicator, appState.unitConfiguration, sensorState);
+            _state(communicator, appState.unitConfiguration, sensorState);
 
         return FloatingActionButton(
           heroTag: "control",

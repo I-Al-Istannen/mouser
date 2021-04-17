@@ -5,6 +5,11 @@ import 'package:mouser/ui/CalibrationScreen.dart';
 import 'package:provider/provider.dart';
 
 class FloatingCalibrateButton extends StatelessWidget {
+  final bool isPrimaryAction;
+
+  const FloatingCalibrateButton({Key key, this.isPrimaryAction = false})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ESenseCommunicator>(
@@ -18,8 +23,8 @@ class FloatingCalibrateButton extends StatelessWidget {
 
         return FloatingActionButton(
           heroTag: "calibrate",
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
+          backgroundColor: isPrimaryAction ? null : Colors.white,
+          foregroundColor: isPrimaryAction ? null : Colors.black,
           child: Icon(MdiIcons.rulerSquareCompass),
           tooltip: "Start calibration",
           onPressed: () {
