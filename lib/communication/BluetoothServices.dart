@@ -8,9 +8,9 @@ import 'package:geolocator/geolocator.dart';
 enum ActivationState { Unavailable, Unauthorized, Disabled, Enabled }
 
 class BluetoothServices extends ChangeNotifier {
-  ActivationState _bluetoothEnabled;
+  ActivationState _bluetoothEnabled = ActivationState.Disabled;
 
-  ActivationState _locationEnabled;
+  ActivationState _locationEnabled = ActivationState.Disabled;
 
   BluetoothServices() {
     Timer.periodic(Duration(seconds: 2), (timer) async {
