@@ -87,7 +87,6 @@ class _BluetoothEnableScreenState extends State<BluetoothEnableScreen> {
     if (error) {
       color = Color.fromARGB(255, 197, 17, 98);
     } else {
-      //color = Color.fromARGB(255, 224, 224, 224);
       color = Color.fromARGB(255, 31, 170, 0);
     }
 
@@ -128,6 +127,7 @@ class _BluetoothEnableScreenState extends State<BluetoothEnableScreen> {
           "error": false
         };
     }
+    throw Error();
   }
 
   _locationState(ActivationState state) {
@@ -161,5 +161,6 @@ class _BluetoothEnableScreenState extends State<BluetoothEnableScreen> {
           "action": null
         };
     }
+    throw Error();
   }
 }
