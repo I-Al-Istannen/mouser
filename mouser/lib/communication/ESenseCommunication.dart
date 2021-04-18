@@ -19,7 +19,7 @@ enum ConnectState {
 
 enum SamplingState { NotSampling, Sampling, Calibrating }
 
-final _nodThreshold = 50;
+final _nodThreshold = 40;
 
 /// Encapsulates communication with an eSense unit.
 class ESenseCommunicator extends ChangeNotifier {
