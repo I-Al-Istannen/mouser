@@ -13,23 +13,9 @@ class BluetoothServices extends ChangeNotifier {
   ActivationState _locationEnabled = ActivationState.Disabled;
 
   BluetoothServices() {
-    Timer.periodic(Duration(seconds: 2), (timer) async {
-      var enabled = await Geolocator.isLocationServiceEnabled();
-      var allowed = await Geolocator.checkPermission();
+    Timer.periodic(Duration(seconds: 2), (timer) => _updateLocation());
 
-      switch (allowed) {
-        case LocationPermission.denied:
-        case LocationPermission.deniedForever:
-          _locationEnabled = ActivationState.Unauthorized;
-          break;
-        case LocationPermission.whileInUse:
-        case LocationPermission.always:
-          _locationEnabled =
-              enabled ? ActivationState.Enabled : ActivationState.Disabled;
-      }
-
-      notifyListeners();
-    });
+    _updateLocation();
 
     FlutterBlue.instance.state.listen((event) {
       switch (event) {
@@ -52,6 +38,24 @@ class BluetoothServices extends ChangeNotifier {
 
       notifyListeners();
     });
+  }
+
+  void _updateLocation() async {
+    var enabled = await Geolocator.isLocationServiceEnabled();
+    var allowed = await Geolocator.checkPermission();
+  
+    switch (allowed) {
+      case LocationPermission.denied:
+      case LocationPermission.deniedForever:
+        _locationEnabled = ActivationState.Unauthorized;
+        break;
+      case LocationPermission.whileInUse:
+      case LocationPermission.always:
+        _locationEnabled =
+            enabled ? ActivationState.Enabled : ActivationState.Disabled;
+    }
+  
+    notifyListeners();
   }
 
   /// Returns whether bluetooth is enabled on the device.
