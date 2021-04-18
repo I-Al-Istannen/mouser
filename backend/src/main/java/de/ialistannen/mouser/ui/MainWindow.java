@@ -6,6 +6,7 @@ import de.ialistannen.mouser.data.ClickPacket;
 import de.ialistannen.mouser.data.Packet;
 import de.ialistannen.mouser.data.PitchRollPacket;
 import de.ialistannen.mouser.util.IpUtil;
+import de.ialistannen.mouser.util.MouseMover;
 import de.ialistannen.mouser.util.WellKnown;
 import java.awt.AWTException;
 import java.awt.MouseInfo;
@@ -18,6 +19,7 @@ import java.net.InetAddress;
 import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 
@@ -32,6 +34,7 @@ public class MainWindow extends BorderPane {
   private AddressBroadcaster broadcaster;
   private MobileUnitConnection connection;
   private final OffsetPreview offsetPreview;
+  private MouseMover mouseMover;
 
   public MainWindow() {
     offsetPreview = new OffsetPreview();
@@ -69,6 +72,9 @@ public class MainWindow extends BorderPane {
       connection = new MobileUnitConnection(packetConsumer());
       yieldMouseButton.setText("Take control");
     } else {
+      if (mouseMover != null) {
+        mouseMover.destroy();
+      }
       connection.destroy();
       connection = null;
       yieldMouseButton.setText("Yield mouse control");
@@ -79,6 +85,7 @@ public class MainWindow extends BorderPane {
     double width = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     double height = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
     Robot robot = new Robot();
+    mouseMover = new MouseMover(robot);
 
     return packet -> {
       if (packet instanceof ClickPacket) {
@@ -90,13 +97,15 @@ public class MainWindow extends BorderPane {
 
         double dx = -pitchRollPacket.getRoll();
         double dy = pitchRollPacket.getPitch();
-        // Normalize it to 8 Pixels
+
         double length = Math.sqrt(dx * dx + dy * dy);
-        dx /= length / WellKnown.MAGIC_SCALE;
-        dy /= length / WellKnown.MAGIC_SCALE;
 
         // This whole section is a giant magic number. Values found through trial and error.
         if(length < 13) {
+          // Normalize it
+          dx /= length / WellKnown.MAGIC_SCALE;
+          dy /= length / WellKnown.MAGIC_SCALE;
+
           dx /= Math.exp(-(length - 7)) + 2;
           dy /= Math.exp(-(length - 7)) + 2;
         }
@@ -104,9 +113,9 @@ public class MainWindow extends BorderPane {
         double newX = Math.max(0, Math.min(mousePosition.getX() + dx, width));
         double newY = Math.max(0, Math.min(mousePosition.getY() + dy, height));
 
-        offsetPreview.setData(dx, dy);
+        mouseMover.setTarget(new Point2D(newX, newY));
 
-        robot.mouseMove((int) Math.round(newX), (int) Math.round(newY));
+        offsetPreview.setData(dx, dy);
       }
     };
   }
