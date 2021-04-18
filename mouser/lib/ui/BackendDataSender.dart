@@ -9,8 +9,11 @@ class BackendDataSender extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<ApplicationState, BackendCommunicator, SensorState>(
       builder: (context, appState, communicator, sensorState, child) {
-        if (sensorState.calibratedPitchRollData != null) {
+        if (sensorState.detectedNod) {
+          communicator.sendClick(appState.backendInfo);
+        }
 
+        if (sensorState.calibratedPitchRollData != null) {
           communicator.sendData(
             appState.backendInfo,
             sensorState.calibratedPitchRollData,

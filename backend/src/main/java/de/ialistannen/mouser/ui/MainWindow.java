@@ -2,6 +2,8 @@ package de.ialistannen.mouser.ui;
 
 import de.ialistannen.mouser.communication.AddressBroadcaster;
 import de.ialistannen.mouser.communication.MobileUnitConnection;
+import de.ialistannen.mouser.data.ClickPacket;
+import de.ialistannen.mouser.data.Packet;
 import de.ialistannen.mouser.data.PitchRollPacket;
 import de.ialistannen.mouser.util.IpUtil;
 import de.ialistannen.mouser.util.WellKnown;
@@ -10,6 +12,7 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.awt.event.InputEvent;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.function.Consumer;
@@ -72,33 +75,39 @@ public class MainWindow extends BorderPane {
     }
   }
 
-  private Consumer<PitchRollPacket> packetConsumer() throws AWTException {
+  private Consumer<Packet> packetConsumer() throws AWTException {
     double width = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     double height = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
     Robot robot = new Robot();
 
-    return pitchRollPacket -> {
-      Point mousePosition = MouseInfo.getPointerInfo().getLocation();
-
-      double dx = -pitchRollPacket.getRoll();
-      double dy = pitchRollPacket.getPitch();
-      // Normalize it to 8 Pixels
-      double length = Math.sqrt(dx * dx + dy * dy);
-      dx /= length / WellKnown.MAGIC_SCALE;
-      dy /= length / WellKnown.MAGIC_SCALE;
-
-      // This whole section is a giant magic number. Values found through trial and error.
-      if(length < 13) {
-        dx /= Math.exp(-(length - 7)) + 2;
-        dy /= Math.exp(-(length - 7)) + 2;
+    return packet -> {
+      if (packet instanceof ClickPacket) {
+        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
       }
+      if (packet instanceof PitchRollPacket pitchRollPacket) {
+        Point mousePosition = MouseInfo.getPointerInfo().getLocation();
 
-      double newX = Math.max(0, Math.min(mousePosition.getX() + dx, width));
-      double newY = Math.max(0, Math.min(mousePosition.getY() + dy, height));
+        double dx = -pitchRollPacket.getRoll();
+        double dy = pitchRollPacket.getPitch();
+        // Normalize it to 8 Pixels
+        double length = Math.sqrt(dx * dx + dy * dy);
+        dx /= length / WellKnown.MAGIC_SCALE;
+        dy /= length / WellKnown.MAGIC_SCALE;
 
-      offsetPreview.setData(dx, dy);
+        // This whole section is a giant magic number. Values found through trial and error.
+        if(length < 13) {
+          dx /= Math.exp(-(length - 7)) + 2;
+          dy /= Math.exp(-(length - 7)) + 2;
+        }
 
-      robot.mouseMove((int) Math.round(newX), (int) Math.round(newY));
+        double newX = Math.max(0, Math.min(mousePosition.getX() + dx, width));
+        double newY = Math.max(0, Math.min(mousePosition.getY() + dy, height));
+
+        offsetPreview.setData(dx, dy);
+
+        robot.mouseMove((int) Math.round(newX), (int) Math.round(newY));
+      }
     };
   }
 }

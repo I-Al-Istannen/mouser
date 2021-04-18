@@ -3,7 +3,7 @@ package de.ialistannen.mouser.communication;
 import static de.ialistannen.mouser.util.WellKnown.PACKET_SIZE;
 import static de.ialistannen.mouser.util.WellKnown.RECEIVE_PORT;
 
-import de.ialistannen.mouser.data.PitchRollPacket;
+import de.ialistannen.mouser.data.Packet;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -17,11 +17,11 @@ import java.util.function.Consumer;
 public class MobileUnitConnection {
 
   private final DatagramSocket socket;
-  private final Consumer<PitchRollPacket> consumer;
+  private final Consumer<Packet> consumer;
   private final ExecutorService executor;
   private volatile boolean running;
 
-  public MobileUnitConnection(Consumer<PitchRollPacket> consumer) throws SocketException {
+  public MobileUnitConnection(Consumer<Packet> consumer) throws SocketException {
     this.consumer = consumer;
     this.socket = new DatagramSocket(RECEIVE_PORT);
     this.running = true;
@@ -43,7 +43,7 @@ public class MobileUnitConnection {
       try {
         socket.receive(packet);
         ByteBuffer buffer = ByteBuffer.wrap(packet.getData());
-        consumer.accept(new PitchRollPacket(buffer.getDouble(), buffer.getDouble()));
+        consumer.accept(Packet.fromData(buffer));
       } catch (SocketTimeoutException ignored) {
       } catch (IOException e) {
         if (e.getMessage().contains("Socket closed")) {

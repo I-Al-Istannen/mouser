@@ -54,9 +54,20 @@ class BackendCommunicator extends ChangeNotifier {
     if (_socket == null) {
       await _initSocket();
     }
-    var bytes = ByteData(2 * 8);
-    bytes.setFloat64(0, data.pitch);
-    bytes.setFloat64(8, data.roll);
+    var bytes = ByteData(2 * 8 + 1);
+    bytes.setInt8(0, 0);
+    bytes.setFloat64(1, data.pitch);
+    bytes.setFloat64(9, data.roll);
+    _socket.send(bytes.buffer.asInt8List(), backendInfo.address, 13338);
+  }
+
+  /// Sends data to a given backend.
+  Future<void> sendClick(BackendInfo backendInfo) async {
+    if (_socket == null) {
+      await _initSocket();
+    }
+    var bytes = ByteData(2 * 8 + 1);
+    bytes.setInt8(0, 1);
     _socket.send(bytes.buffer.asInt8List(), backendInfo.address, 13338);
   }
 }

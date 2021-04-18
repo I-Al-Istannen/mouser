@@ -1,6 +1,6 @@
 package de.ialistannen.mouser.data;
 
-public class PitchRollPacket {
+public class PitchRollPacket extends Packet {
 
   private final double pitch;
   private final double roll;
