@@ -37,6 +37,14 @@
         </executions>
         <configuration>
           <finalName>${project.name}</finalName>
+          <transformers>
+            <transformer
+              implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <manifestEntries>
+                <Main-Class>de.ialistannen.mouser.Launcher</Main-Class>
+              </manifestEntries>
+            </transformer>
+          </transformers>
         </configuration>
       </plugin>
 

@@ -32,6 +32,7 @@ List<double> convertGyroToDegPerSecond(List<int> gyro) {
 
 /// Takes historical data, a sampling rate and a new event and returns an
 /// updated guess of the current pitch and roll.
+/// Model mostly taken from https://www.eti.uni-siegen.de/ubicomp/papers/ubi_earcomp2019b.pdf
 PitchRollData adjustToSample(
     PitchRollData historical,
     List<double> accelDataInG,
